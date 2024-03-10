@@ -7,6 +7,7 @@ export OUTPUT_DIR="$EXEC_DIR/sys"
 function baremetal_clean {
 	rm -rf src
 	rm -rf bin
+	rm mcp
 }
 
 function baremetal_setup {
