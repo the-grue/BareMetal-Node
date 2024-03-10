@@ -1,3 +1,15 @@
 .DS_Store
 src/*
-sys/*
+bin/*
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Executables
+*.sys
+*.bin
+*.app
+mcp
