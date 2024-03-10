@@ -14,6 +14,7 @@ function baremetal_clean {
 function baremetal_setup {
 	baremetal_clean
 	mkdir bin
+	mkdir bin/os
 	cd src
 	echo "Pulling code from GitHub..."
 	git clone https://github.com/ReturnInfinity/Pure64.git -q
@@ -29,17 +30,19 @@ function baremetal_build {
 	cd src
 	cd Pure64
 	./build.sh
-	cp bin/* ../../bin
+	cp bin/* ../../bin/os
 	cd ..
 	cd BareMetal-kernel
 	./build.sh
-	cp bin/* ../../bin
-	cd ../../bin
+	cp bin/* ../../bin/os
+	cd ../../bin/os
 	cat pxestart.sys pure64.sys kernel.sys > pxeboot.bin
-	cd ../src
-	gcc mcp.c -o ../mcp
-	cd ..
+	cd ../../src
+	nasm test.asm -o ../bin/test.app
+	gcc mcp.c -o mcp
 	strip mcp
+	mv mcp ../bin/
+	cd ..
 }
 
 function baremetal_install {

@@ -3,7 +3,7 @@
 [BITS 64]
 [ORG 0xFFFF800000000000]
 
-%INCLUDE "src/BareMetal-kernel/api/libBareMetal.asm"
+%INCLUDE "BareMetal-kernel/api/libBareMetal.asm"
 
 main:					; Start of program label
 
@@ -22,10 +22,11 @@ main:					; Start of program label
 	call [b_output]			; Print the string that RSI points to
 
 	mov rdi, [fbuff]
-	mov eax, 0xFFFFFF00
-	stosd
+	mov eax, 0x00808080
+	mov ecx, 800*600
+	rep stosd
 
-	ret				; Return to OS
+	ret				; Return to caller
 
 hello_message: db 'Node online', 10, 0
 

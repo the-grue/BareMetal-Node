@@ -36,6 +36,7 @@ Notes on configuring a PXE book environment can be found [here](https://github.c
 
 The [MCP](http://tron.wikia.com/wiki/Master_Control_Program) (Master Control Program) is responsible for working with the nodes. Elevated access is required for sending/receiving Ethernet packets. Provide the interface name as an argument.
 
+	cd bin
 	sudo ./mcp INTERFACE
 
 The MCP has several commands that can be run.
