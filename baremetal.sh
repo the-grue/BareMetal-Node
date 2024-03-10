@@ -15,13 +15,16 @@ function baremetal_setup {
 	baremetal_clean
 	mkdir bin
 	cd src
-	git clone https://github.com/ReturnInfinity/Pure64.git
-	git clone https://github.com/ReturnInfinity/BareMetal-kernel.git
+	echo "Pulling code from GitHub..."
+	git clone https://github.com/ReturnInfinity/Pure64.git -q
+	git clone https://github.com/ReturnInfinity/BareMetal-kernel.git -q
 	cd ..
 	baremetal_build
+	echo "Done!"
 }
 
 function baremetal_build {
+	echo "Building software..."
 	cp src/interrupt.asm src/BareMetal-kernel/src/
 	cd src
 	cd Pure64
@@ -40,6 +43,7 @@ function baremetal_build {
 }
 
 function baremetal_install {
+	echo "Copying PXE boot file to TFTP..."
 	cp pxeboot.bin /srv/tftp/
 }
 
