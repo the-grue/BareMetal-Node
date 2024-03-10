@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 
 				if ((file = fopen(filename, "rb")) == NULL)
 				{
-					printf("Error opening file '%s'", filename);
+					printf("Error opening file '%s'. File not dispatched.\n", filename);
 				}
 				else
 				{
