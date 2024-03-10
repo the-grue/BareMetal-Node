@@ -11,7 +11,7 @@
 // 0xABBB - Data
 // Instruction - 16 bit value
 // Bits 10 - 0 are the total packet size - max packet size is 1518 in total
-// Bits 15 - 12 encode the instuction - space for 16 commands
+// Bits 15 - 12 encode the instruction - space for 16 commands
 
 /* Global Includes */
 #include <stdio.h>
@@ -69,7 +69,7 @@ FILE *file;
 int main(int argc, char *argv[])
 {
 	printf("\nMaster Control Program for BareMetal Node v0.1\n");
-	printf("© 2018 Return Infinity, Inc.\n\n");
+	printf("© 2024 Return Infinity, Inc.\n\n");
 
 	/* first argument needs to be a NIC */
 	if (argc < 2)

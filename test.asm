@@ -3,7 +3,7 @@
 [BITS 64]
 [ORG 0xFFFF800000000000]
 
-%INCLUDE "os/BareMetal-kernel/api/libBareMetal.asm"
+%INCLUDE "src/BareMetal-kernel/api/libBareMetal.asm"
 
 main:					; Start of program label
 

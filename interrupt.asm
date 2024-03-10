@@ -86,8 +86,13 @@ keyboard_noshift:
 	jmp keyboard_done
 
 keyboard_done:
-	mov al, 0x20			; Acknowledge the IRQ
-	out 0x20, al
+	; Acknowledge the IRQ
+	push rcx
+	mov rcx, APIC_EOI
+	xor eax, eax
+	call os_apic_write
+	pop rcx
+
 	call b_smp_wakeup_all		; A terrible hack
 
 	popfq
@@ -163,9 +168,12 @@ rtc_end:
 	out 0x70, al			; Port 0x70 is the RTC index, and 0x71 is the RTC data
 	in al, 0x71			; Read the value in register C
 
-	mov al, 0x20			; Acknowledge the IRQ
-	out 0xA0, al
-	out 0x20, al
+	; Acknowledge the IRQ
+	push rcx
+	mov rcx, APIC_EOI
+	xor eax, eax
+	call os_apic_write
+	pop rcx
 
 	popfq
 	pop rax
@@ -255,12 +263,10 @@ network_tx:
 	jc network_rx_as_well
 
 network_end:
-	mov al, 0x20			; Acknowledge the IRQ on the PIC(s)
-	cmp byte [os_NetIRQ], 8
-	jl network_ack_only_low		; If the network IRQ is less than 8 then the other PIC does not need to be ack'ed
-	out 0xA0, al
-network_ack_only_low:
-	out 0x20, al
+	; Acknowledge the IRQ
+	mov rcx, APIC_EOI
+	xor eax, eax
+	call os_apic_write
 
 	popfq
 	pop rax
@@ -381,10 +387,10 @@ ap_wakeup:
 	push rdi
 	push rax
 
-	mov rdi, [os_LocalAPICAddress]	; Acknowledge the IPI
-	add rdi, 0xB0
+	; Acknowledge the IPI
+	mov rcx, APIC_EOI
 	xor eax, eax
-	stosd
+	call os_apic_write
 
 	pop rax
 	pop rdi
@@ -396,6 +402,7 @@ ap_wakeup:
 ; Resets a CPU to execute ap_clear
 align 8
 ap_reset:
+	; Don't use 'os_apic_write' as we can't guarantee the state of the stack
 	mov rax, ap_clear		; Set RAX to the address of ap_clear
 	mov [rsp], rax			; Overwrite the return address on the CPU's stack
 	mov rdi, [os_LocalAPICAddress]	; Acknowledge the IPI
@@ -410,49 +417,73 @@ ap_reset:
 ; CPU Exception Gates
 align 8
 exception_gate_00:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x00
 	jmp exception_gate_main
 
 align 8
 exception_gate_01:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x01
 	jmp exception_gate_main
 
 align 8
 exception_gate_02:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x02
 	jmp exception_gate_main
 
 align 8
 exception_gate_03:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x03
 	jmp exception_gate_main
 
 align 8
 exception_gate_04:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x04
 	jmp exception_gate_main
 
 align 8
 exception_gate_05:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x05
 	jmp exception_gate_main
 
 align 8
 exception_gate_06:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x06
 	jmp exception_gate_main
 
 align 8
 exception_gate_07:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x07
 	jmp exception_gate_main
 
@@ -461,10 +492,14 @@ exception_gate_08:
 	push rax
 	mov al, 0x08
 	jmp exception_gate_main
+	times 16 db 0x90
 
 align 8
 exception_gate_09:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x09
 	jmp exception_gate_main
 
@@ -473,40 +508,51 @@ exception_gate_10:
 	push rax
 	mov al, 0x0A
 	jmp exception_gate_main
+	times 16 db 0x90
 
 align 8
 exception_gate_11:
 	push rax
 	mov al, 0x0B
 	jmp exception_gate_main
+	times 16 db 0x90
 
 align 8
 exception_gate_12:
 	push rax
 	mov al, 0x0C
 	jmp exception_gate_main
+	times 16 db 0x90
 
 align 8
 exception_gate_13:
 	push rax
 	mov al, 0x0D
 	jmp exception_gate_main
+	times 16 db 0x90
 
 align 8
 exception_gate_14:
 	push rax
 	mov al, 0x0E
 	jmp exception_gate_main
+	times 16 db 0x90
 
 align 8
 exception_gate_15:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x0F
 	jmp exception_gate_main
 
 align 8
 exception_gate_16:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x10
 	jmp exception_gate_main
 
@@ -515,23 +561,39 @@ exception_gate_17:
 	push rax
 	mov al, 0x11
 	jmp exception_gate_main
+	times 16 db 0x90
 
 align 8
 exception_gate_18:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x12
 	jmp exception_gate_main
 
 align 8
 exception_gate_19:
-	push rax
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
 	mov al, 0x13
+	jmp exception_gate_main
+
+align 8
+exception_gate_20:
+	mov [rsp-16], rax
+	xor eax, eax
+	mov [rsp-8], rax
+	sub rsp, 16
+	mov al, 0x14
 	jmp exception_gate_main
 
 align 8
 exception_gate_main:
 	mov qword [os_NetworkCallback], 0	; Reset the network callback
-	mov qword [os_ClockCallback], 0		; Reset the clockk callback
+	mov qword [os_ClockCallback], 0		; Reset the clock callback
 	push rbx
 	push rdi
 	push rsi
@@ -552,54 +614,56 @@ exception_gate_main:
 	pop rax
 	and rax, 0x00000000000000FF	; Clear out everything in RAX except for AL
 	push rax
-	mov bl, 8			; Length of each message
+	mov bl, 6			; Length of each message
 	mul bl				; AX = AL x BL
 	add rsi, rax			; Use the value in RAX as an offset to get to the right message
 	pop rax
 	mov bl, 0x0F
-	mov rcx, 7
+	mov rcx, 6
 	call b_output
+	pop rcx
 	pop rsi
 	pop rdi
 	pop rbx
 	pop rax
-;	mov rsi, int_string02
-;	call b_output
-	push rax
-	mov rax, [rsp+0x08] 		; RIP of caller
+	mov rsi, int_string02
+	mov rcx, 5
+	call b_output
+	mov rax, [rsp+8] 			; RIP of caller
 	call os_debug_dump_rax
-	pop rax
-;	call os_print_newline
+	mov rsi, newline
+	mov rcx, 1
+	call b_output
 	jmp $				; For debugging
-	call init_memory_map
 	jmp ap_clear			; jump to AP clear code
 
 
-int_string00 db 'Fatal Exception - CPU 0x', 0
-int_string01 db ' - Interrupt ', 0
-int_string02 db ' @ 0x', 0
+int_string00 db 'Fatal Exception - CPU 0x'
+int_string01 db ' - Interrupt '
+int_string02 db ' @ 0x'
 ; Strings for the error messages
-exc_string db 'Unknown Fatal Exception!', 0
-exc_string00 db '00 (DE)', 0
-exc_string01 db '01 (DB)', 0
-exc_string02 db '02     ', 0
-exc_string03 db '03 (BP)', 0
-exc_string04 db '04 (OF)', 0
-exc_string05 db '05 (BR)', 0
-exc_string06 db '06 (UD)', 0
-exc_string07 db '07 (NM)', 0
-exc_string08 db '08 (DF)', 0
-exc_string09 db '09     ', 0	; No longer generated on new CPU's
-exc_string10 db '10 (TS)', 0
-exc_string11 db '11 (NP)', 0
-exc_string12 db '12 (SS)', 0
-exc_string13 db '13 (GP)', 0
-exc_string14 db '14 (PF)', 0
-exc_string15 db '15     ', 0
-exc_string16 db '16 (MF)', 0
-exc_string17 db '17 (AC)', 0
-exc_string18 db '18 (MC)', 0
-exc_string19 db '19 (XM)', 0
+exc_string db 'Unknown Fatal Exception!'
+exc_string00 db '00(DE)'
+exc_string01 db '01(DB)'
+exc_string02 db '02    '
+exc_string03 db '03(BP)'
+exc_string04 db '04(OF)'
+exc_string05 db '05(BR)'
+exc_string06 db '06(UD)'
+exc_string07 db '07(NM)'
+exc_string08 db '08(DF)'
+exc_string09 db '09    '	; No longer generated on new CPU's
+exc_string10 db '10(TS)'
+exc_string11 db '11(NP)'
+exc_string12 db '12(SS)'
+exc_string13 db '13(GP)'
+exc_string14 db '14(PF)'
+exc_string15 db '15    '
+exc_string16 db '16(MF)'
+exc_string17 db '17(AC)'
+exc_string18 db '18(MC)'
+exc_string19 db '19(XM)'
+exc_string20 db '20(VE)'
 
 
 ; =============================================================================

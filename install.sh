@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cp pxeboot.bin /var/lib/tftpboot/
+cp pxeboot.bin /srv/tftp/

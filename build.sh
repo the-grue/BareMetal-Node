@@ -1,18 +1,17 @@
 #!/bin/bash
 
-cp interrupt.asm os/BareMetal-kernel/src/x86-64/
-cd os
-cd Pure64/src/arch/x86_64/
+cp interrupt.asm src/BareMetal-kernel/src/
+cd src
+cd Pure64
 ./build.sh
-cp pure64.sys ../../../../..
-cd bootsectors
-./build.sh
-cp pxestart.sys ../../../../../..
-cd ../../../../..
+cp bin/* ..
+cd ..
 cd BareMetal-kernel
-./build_x86-64.sh
-cp kernel.sys ../..
-cd ../..
+./build.sh
+cp bin/* ..
+cd ..
 cat pxestart.sys pure64.sys kernel.sys > pxeboot.bin
+cp pxeboot.bin ..
+cd ..
 gcc mcp.c -o mcp
 strip mcp
