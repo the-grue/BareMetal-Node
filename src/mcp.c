@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
 					printf("execute:    Execute the program on the node or all nodes");
 					printf("\n            'execute *' - Set all nodes to execute");
 					printf("\n            'execute 2' - Set node 2 to execute");
-					printf("\n            'execute 1 n' - Set node 1 to execute but don't wait for result\n")
+					printf("\n            'execute 1 n' - Set node 1 to execute but don't wait for result\n");
 				}
 				else if (strcasecmp(s_parameters, command) == 0)
 				{
