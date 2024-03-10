@@ -5,14 +5,14 @@ export EXEC_DIR="$PWD"
 export OUTPUT_DIR="$EXEC_DIR/sys"
 
 function baremetal_clean {
-	rm -rf src
+	rm -rf src/Pure64
+	rm -rf src/BareMetal-kernel
 	rm -rf bin
-	rm mcp
+	rm -f mcp
 }
 
 function baremetal_setup {
 	baremetal_clean
-	mkdir src
 	mkdir bin
 	cd src
 	git clone https://github.com/ReturnInfinity/Pure64.git
@@ -22,7 +22,7 @@ function baremetal_setup {
 }
 
 function baremetal_build {
-	cp interrupt.asm src/BareMetal-kernel/src/
+	cp src/interrupt.asm src/BareMetal-kernel/src/
 	cd src
 	cd Pure64
 	./build.sh
@@ -33,8 +33,9 @@ function baremetal_build {
 	cp bin/* ../../bin
 	cd ../../bin
 	cat pxestart.sys pure64.sys kernel.sys > pxeboot.bin
+	cd ../src
+	gcc mcp.c -o ../mcp
 	cd ..
-	gcc mcp.c -o mcp
 	strip mcp
 }
 
