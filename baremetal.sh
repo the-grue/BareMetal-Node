@@ -27,6 +27,7 @@ function baremetal_setup {
 function baremetal_build {
 	echo "Building software..."
 	cp src/interrupt.asm src/BareMetal-kernel/src/
+	cp src/BareMetal-kernel/api/libBareMetal* src/
 	cd src
 	cd Pure64
 	./build.sh
