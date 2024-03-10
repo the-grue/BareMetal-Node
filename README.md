@@ -1,6 +1,6 @@
 # BareMetal Node
 
-Insert summary here
+This project uses the BareMetal kernel to allow you to create a network of "nodes" for distributed processing tasks.
 
 
 ## Getting Started
@@ -10,9 +10,9 @@ Insert summary here
 
 [NASM](http://www.nasm.us) (Assembly compiler) is required to build the loader and kernel, as well as the apps written in Assembly. [GCC](https://gcc.gnu.org/) (C compiler) is required for building the MCP, as well as the C applications. [Git](https://git-scm.com/) is used for pulling the software from GitHub.
 
-In Ubuntu this can be completed with the following command:
+In Debian this can be completed with the following command:
 
-	sudo apt-get install nasm gcc git
+	sudo apt install nasm gcc git
 
 
 ### Initial setup
@@ -44,6 +44,11 @@ The MCP has several commands that can be run.
 - dispatch
 - execute
 - exit
+- list
+- parameters
+- reboot
+- reset
+- stop
 
 
 ## Todo list
