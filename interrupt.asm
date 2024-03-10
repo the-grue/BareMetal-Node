@@ -350,8 +350,8 @@ mcp_info:
 	stosw
 	mov eax, [os_MemAmount]
 	stosd
-	mov eax, [hd1_size]
-	stosd
+;	mov eax, [hd1_size]
+;	stosd
 	pop rsi
 	mov rcx, 64
 	call b_net_tx
