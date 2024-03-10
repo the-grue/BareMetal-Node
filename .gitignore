@@ -1,5 +1,6 @@
 .DS_Store
-src/*
+src/Pure64/*
+src/BareMetal-kernel/*
 bin/*
 
 # Object files
