@@ -47,6 +47,17 @@ function baremetal_install {
 	cp pxeboot.bin /srv/tftp/
 }
 
+function baremetal_disk {
+	echo "Creating disk image..."
+	cd bin
+	dd if=/dev/zero of=disk.img count=128 bs=1048576 > /dev/null 2>&1
+	dd if=/dev/zero of=null.bin count=8 bs=1 > /dev/null 2>&1
+	cat pure64.sys kernel.sys > software.sys
+	dd if=mbr.sys of=disk.img conv=notrunc > /dev/null 2>&1
+	dd if=software.sys of=disk.img bs=4096 seek=2 conv=notrunc > /dev/null 2>&1
+	qemu-img convert -O vdi "disk.img" "BareMetal_Node.vdi"
+}
+
 function baremetal_help {
 	echo "BareMetal-Node Script"
 	echo "Available commands:"
@@ -54,6 +65,7 @@ function baremetal_help {
 	echo "setup    - Clean and setup"
 	echo "build    - Build source code"
 	echo "install  - Copy the PXE boot file to the TFTP folder"
+	echo "disk     - Create a disk image for local boot"
 }
 
 if [ $# -eq 0 ]; then
@@ -67,6 +79,8 @@ elif [ $# -eq 1 ]; then
 		baremetal_build
 	elif [ "$1" == "install" ]; then
 		baremetal_install
+	elif [ "$1" == "disk" ]; then
+		baremetal_disk
 	elif [ "$1" == "help" ]; then
 		baremetal_help
 	else
