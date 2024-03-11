@@ -1,6 +1,8 @@
 BITS 64
 ORG 0x001E0000
 
+CONSOLESIZE equ 4096
+
 %include 'libBareMetal.asm'
 
 
@@ -991,8 +993,9 @@ hextable: db '0123456789ABCDEF'
 tchar: db 0, 0, 0
 temp_string1: times 50 db 0
 temp_string2: times 50 db 0
-align 4096
 temp_string: db 0
+
+times CONSOLESIZE-($-$$) db 0x90		; Set the compiled kernel binary to at least this size in bytes
 
 ; =============================================================================
 ; EOF

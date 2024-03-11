@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 					memcpy(&node_Memory[nodes], &buffer[20], 4);
 					memcpy(&node_HDDSize[nodes], &buffer[24], 4);
 					nodes++;
-					printf("\nID %02d - MAC %02X:%02X:%02X:%02X:%02X:%02X - %d Cores at %d MHz, %d MiB RAM, %d MiB HDD", nodes, buffer[6], buffer[7], buffer[8], buffer[9], buffer[10], buffer[11], node_NumCores[nodes-1], node_Speed[nodes-1], node_Memory[nodes-1], node_HDDSize[nodes-1]);
+					printf("\nID %02d - MAC %02X:%02X:%02X:%02X:%02X:%02X - %d Cores at %d MHz, %d MiB RAM", nodes, buffer[6], buffer[7], buffer[8], buffer[9], buffer[10], buffer[11], node_NumCores[nodes-1], node_Speed[nodes-1], node_Memory[nodes-1]);
 					fflush(stdout);
 				}
 			}
@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
 							c = recvfrom(s, buffer, ETH_FRAME_LEN, 0, 0, 0);
 							if ((buffer[12] == 0xAB) & (buffer[13] == 0xBB))
 							{
-								memcpy(&node_Result[nodeid], &buffer[14], 8);
+								memcpy(&node_Result[nodeid], &buffer[16], 8);
 							}
 						}
 						printf("Complete\n");
@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
 								{
 									if ((buffer[6] == node_ID[tint2][0]) & (buffer[7] == node_ID[tint2][1]) & (buffer[8] == node_ID[tint2][2]) & (buffer[9] == node_ID[tint2][3]) & (buffer[10] == node_ID[tint2][4]) & (buffer[11] == node_ID[tint2][5]))
 									{
-										memcpy(&node_Result[tint2], &buffer[14], 8);
+										memcpy(&node_Result[tint2], &buffer[16], 8);
 									}
 								}
 								tint++;
