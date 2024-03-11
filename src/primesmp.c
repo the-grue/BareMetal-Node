@@ -65,7 +65,7 @@ int main()
 	time_start = b_config(TIMECOUNTER, 0);		// Grab the starting time
 
 	// Start the other CPU cores
-	for (k=1; k<processes; k++)
+	for (k=0; k<processes; k++)
 	{
 		if (localcore != k)
 		{
