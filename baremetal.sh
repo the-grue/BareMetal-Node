@@ -7,6 +7,7 @@ export OUTPUT_DIR="$EXEC_DIR/sys"
 function baremetal_clean {
 	rm -rf src/Pure64
 	rm -rf src/BareMetal-kernel
+	rm -rf src/libBareMetal.*
 	rm -rf bin
 	rm -f mcp
 }
@@ -36,8 +37,10 @@ function baremetal_build {
 	cd BareMetal-kernel
 	./build.sh
 	cp bin/* ../../bin/os
-	cd ../../bin/os
-	cat pxestart.sys pure64.sys kernel.sys > pxeboot.bin
+	cd ../../src
+	nasm console.asm -o ../bin/os/console.sys
+	cd ../bin/os
+	cat pxestart.sys pure64.sys kernel.sys console.sys > pxeboot.bin
 	cd ../../src
 	nasm test.asm -o ../bin/test.app
 	gcc mcp.c -o mcp
@@ -53,10 +56,9 @@ function baremetal_install {
 
 function baremetal_disk {
 	echo "Creating disk image..."
-	cd bin
+	cd bin/os
 	dd if=/dev/zero of=disk.img count=128 bs=1048576 > /dev/null 2>&1
-	dd if=/dev/zero of=null.bin count=8 bs=1 > /dev/null 2>&1
-	cat pure64.sys kernel.sys > software.sys
+	cat pure64.sys kernel.sys console.sys > software.sys
 	dd if=mbr.sys of=disk.img conv=notrunc > /dev/null 2>&1
 	dd if=software.sys of=disk.img bs=4096 seek=2 conv=notrunc > /dev/null 2>&1
 	qemu-img convert -O vdi "disk.img" "BareMetal_Node.vdi"
