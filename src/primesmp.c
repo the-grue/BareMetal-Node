@@ -18,6 +18,17 @@
 // maxn = 5000000	primes = 348513
 // maxn = 10000000	primes = 664579
 // maxn = 100000000	primes = 5761455
+//
+// Parameters values
+// Cores to use, Starting number, Increment by, Maximum
+// For a single core on one machine
+// Node 1: 1 3 2 100000
+// For 4 cores on one machine
+// Node 1: 4 3 2 100000
+// For 4 cores on two systems
+// Node 1: 4 3 4 100000
+// Node 2: 4 5 4 100000
+//
 
 #include "libBareMetal.h"
 
@@ -41,7 +52,7 @@ struct EthPacket {
 
 int main()
 {
-	unsigned long time_start, time_finish, k, p = 1, q, localcore;
+	unsigned long time_start, time_finish, k, p, q, localcore;
 	struct EthPacket packet;
 	
 	char * mac = (void *)0x110048;
@@ -62,7 +73,7 @@ int main()
 	packet.eth_type[1] = 0xBB;
 
 	// Get parameter values
-	// Default would be 1, 3, 2
+	// Default would be 1, 3, 2, 100000
 	char * params = (void *)0x800E;
 	processes = atoi(params);
 	params += 2;
@@ -72,14 +83,14 @@ int main()
 	params += 2;
 	maxn = atoi(params);
 
+	output("\nBareMetal Node PrimeSMP v0.1\n");
 	if (processes == 0 || start == 0 || incby == 0 || maxn == 0)
 	{
 		output ("Invalid parameters.\n");
 		return 0;
 	}
 
-	output("\nBareMetal Node PrimeSMP v0.1");
-	output("\nUsing ");
+	output("Using ");
 	itoa(processes, tstring);
 	output(tstring);
 	output(" CPU core(s), starting at ");
@@ -108,19 +119,16 @@ int main()
 	prime_process();
 
 	// Wait for all other CPU cores to be finished
-//	while (p == 1)
-//	{
-		b_system(SMP_BUSY, (void *)p, (void *)q);
-//		itoa(p, tstring);
-//		output(tstring);
-//	}
-//	b_smp_wait();				// Wait for all CPU cores to finish
+	do {
+		b_system(SMP_BUSY, (void *)&p, (void *)&q);
+	} while (p == 1);
 
-	// Output the results
-	output("\nFound ");
-	itoa(primes, tstring);
-	output(tstring);
-	output(" primes\n");
+	// Output the results to console
+	output("\nDone!\n");
+//	output("\nFound ");
+//	itoa(primes, tstring);
+//	output(tstring);
+//	output(" primes\n");
 
 	// Send the result
 	imemcpy(&packet.eth_data, &primes, 8);
@@ -145,10 +153,10 @@ void prime_process()
 	// Lock process_stage, copy it to local var, subtract 1 from process_stage, unlock it.
 	b_system(SMP_LOCK, (void *)lock, 0);
 	process_stage--;
-	output("\nRunning on core ");
-	core = b_config(SMP_GET_ID, 0);
-	itoa(core, tstring);
-	output(tstring);
+//	output("\nRunning on core ");
+//	core = b_config(SMP_GET_ID, 0);
+//	itoa(core, tstring);
+//	output(tstring);
 	b_system(SMP_UNLOCK, (void *)lock, 0);
 	i = start + (process_stage * incby);
 	h = processes * incby;
@@ -171,7 +179,6 @@ void prime_process()
 	primes = primes + tprimes;
 	b_system(SMP_UNLOCK, (void *)lock, 0);
 }
-
 
 void * imemcpy (void *dest, const void *src, int len)
 {
@@ -240,12 +247,6 @@ void itoa(int n, char s[])
 
 int atoi(char s[])
 {
- //   register char *string;	/* String of ASCII digits, possibly
-//				 * preceded by white space.  For bases
-//				 * greater than 10, either lower- or
-//				 * upper-case digits may be used.
-//				 */
-//{
 	register int result = 0;
 	register unsigned int digit;
 	int sign;
