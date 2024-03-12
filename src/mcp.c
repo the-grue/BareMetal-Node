@@ -371,7 +371,7 @@ int main(int argc, char *argv[])
 							c = recvfrom(s, buffer, ETH_FRAME_LEN, 0, 0, 0);
 							if ((buffer[12] == 0xAB) & (buffer[13] == 0xBB))
 							{
-								memcpy(&node_Result[nodeid], &buffer[16], 8);
+								memcpy(&node_Result[nodeid], &buffer[14], 8);
 							}
 						}
 						printf("Complete\n");
@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
 								{
 									if ((buffer[6] == node_ID[tint2][0]) & (buffer[7] == node_ID[tint2][1]) & (buffer[8] == node_ID[tint2][2]) & (buffer[9] == node_ID[tint2][3]) & (buffer[10] == node_ID[tint2][4]) & (buffer[11] == node_ID[tint2][5]))
 									{
-										memcpy(&node_Result[tint2], &buffer[16], 8);
+										memcpy(&node_Result[tint2], &buffer[14], 8);
 									}
 								}
 								tint++;

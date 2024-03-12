@@ -31,15 +31,35 @@ int atoi(char s[]);
 unsigned long maxn=100000, primes=0, local=0, lock=0, process_stage=0, processes=0, args=0, start=3, incby=0;
 unsigned char tstring[25];
 
-unsigned char eth_dst[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-unsigned char eth_src[6] = {0x08, 0x00, 0x27, 0xeb, 0x6b, 0x23}; // server address
-unsigned char eth_type[2] = {0xAB, 0xBB};
-unsigned char eth_data[10] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
+struct EthPacket {
+	unsigned char eth_dst[6];
+	unsigned char eth_src[6];
+	unsigned char eth_type[2];
+	unsigned char eth_data[10];
+};
 
 int main()
 {
-	unsigned long k, p = 1, q, localcore;
+	unsigned long time_start, time_finish, k, p = 1, q, localcore;
+	struct EthPacket packet;
 	
+	char * mac = (void *)0x110048;
+
+	packet.eth_dst[0] = 0xff;
+	packet.eth_dst[1] = 0xff;
+	packet.eth_dst[2] = 0xff;
+	packet.eth_dst[3] = 0xff;
+	packet.eth_dst[4] = 0xff;
+	packet.eth_dst[5] = 0xff;
+	packet.eth_src[0] = mac[0];
+	packet.eth_src[1] = mac[1];
+	packet.eth_src[2] = mac[2];
+	packet.eth_src[3] = mac[3];
+	packet.eth_src[4] = mac[4];
+	packet.eth_src[5] = mac[5];
+	packet.eth_type[0] = 0xAB;
+	packet.eth_type[1] = 0xBB;
+
 	// Get parameter values
 	// Default would be 1, 3, 2
 	char * params = (void *)0x800E;
@@ -97,8 +117,8 @@ int main()
 	output(" primes\n");
 
 	// Send the result
-	imemcpy(&eth_data, &primes, 8);
-	b_net_tx((void *)&eth_dst, 64, 0);
+	imemcpy(&packet.eth_data, &primes, 8);
+	b_net_tx((void *)&packet, 64, 0);
 
 	return 0;
 }
@@ -214,6 +234,12 @@ void itoa(int n, char s[])
 
 int atoi(char s[])
 {
+ //   register char *string;	/* String of ASCII digits, possibly
+//				 * preceded by white space.  For bases
+//				 * greater than 10, either lower- or
+//				 * upper-case digits may be used.
+//				 */
+//{
 	register int result = 0;
 	register unsigned int digit;
 	int sign;
