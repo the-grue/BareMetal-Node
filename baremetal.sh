@@ -45,9 +45,17 @@ function baremetal_build {
 	cat pxestart.sys pure64.sys kernel.sys console.sys > pxeboot.bin
 	cd ../../src
 	nasm test.asm -o ../bin/test.app
-	gcc mcp.c -o mcp
-	strip mcp
-	mv mcp ../bin/
+	if [ "$(uname)" != "Darwin" ]; then
+		gcc mcp.c -o mcp
+		strip mcp
+		mv mcp ../bin/
+		gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -mno-red-zone -falign-functions=16 -o primesmp.o primesmp.c
+		gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -mno-red-zone -falign-functions=16 -o libBareMetal.o libBareMetal.c
+		objcopy --remove-section .eh_frame --remove-section .rel.eh_frame --remove-section .rela.eh_frame primesmp.o
+		objcopy --remove-section .eh_frame --remove-section .rel.eh_frame --remove-section .rela.eh_frame libBareMetal.o
+		ld -T c.ld -o primesmp.app primesmp.o libBareMetal.o
+		mv primesmp.app ../bin/
+	fi
 	cd ..
 }
 
