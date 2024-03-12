@@ -1,10 +1,10 @@
-// BareMetal Node PrimeSMP v0.1 (March 11, 2024)
+// BareMetal Node PrimeSMP v1.0 (March 12, 2024)
 // Written by Ian Seyler
 //
 // This program checks all odd numbers between 3 and 'maxn' and determines if they are prime.
 // On exit the program will display the execution time and how many prime numbers were found.
 //
-// BareMetal compile using GCC (Tested with 4.5.0)
+// BareMetal compile using GCC (Tested with 12.2.0)
 // gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -mno-red-zone -falign-functions=16 -o primesmp.o primesmp.c
 // gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -mno-red-zone -falign-functions=16 -o libBareMetal.o libBareMetal.c
 // objcopy --remove-section .eh_frame --remove-section .rel.eh_frame --remove-section .rela.eh_frame primesmp.o
@@ -72,7 +72,7 @@ int main()
 	packet.eth_type[1] = 0xBB;
 
 	// Get parameter values
-	// Default would be 1, 3, 2, 100000
+	// Defaults would be 1, 3, 2, 100000
 	char * params = (void *)0x800E;
 	processes = i_atoi(params);
 	params += 2;
@@ -82,7 +82,7 @@ int main()
 	params += 2;
 	maxn = i_atoi(params);
 
-	output("\nBareMetal Node PrimeSMP v0.1\n");
+	output("\nBareMetal Node PrimeSMP v1.0\n");
 	if (processes == 0 || start == 0 || incby == 0 || maxn == 0)
 	{
 		output ("Invalid parameters.\n");
