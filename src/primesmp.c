@@ -11,6 +11,7 @@
 // objcopy --remove-section .eh_frame --remove-section .rel.eh_frame --remove-section .rela.eh_frame libBareMetal.o
 // ld -T c.ld -o primesmp.app primesmp.o libBareMetal.o
 //
+// maxn = 1000		primes = 168
 // maxn = 100000	primes = 9592
 // maxn = 500000	primes = 41538
 // maxn = 1000000	primes = 78498
@@ -28,7 +29,7 @@ char *reverse(char *str);
 void itoa(int n, char s[]);
 int atoi(char s[]);
 
-unsigned long maxn=100000, primes=0, local=0, lock=0, process_stage=0, processes=0, args=0, start=3, incby=0;
+unsigned long maxn=0, primes=0, local=0, lock=0, process_stage=0, processes=0, args=0, start=0, incby=0;
 unsigned char tstring[25];
 
 struct EthPacket {
@@ -68,8 +69,10 @@ int main()
 	start = atoi(params);
 	params += 2;
 	incby = atoi(params);
+	params += 2;
+	maxn = atoi(params);
 
-	if (processes == 0 || start == 0 || incby == 0)
+	if (processes == 0 || start == 0 || incby == 0 || maxn == 0)
 	{
 		output ("Invalid parameters.\n");
 		return 0;
@@ -84,6 +87,9 @@ int main()
 	output(tstring);
 	output(", incrementing by ");
 	itoa(incby, tstring);
+	output(tstring);
+	output(", going up to ");
+	itoa(maxn, tstring);
 	output(tstring);
 	
 	process_stage = processes;
