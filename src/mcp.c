@@ -42,6 +42,7 @@ unsigned short node_NumCores[maxnodes];
 unsigned int node_Memory[maxnodes];
 unsigned int node_HDDSize[maxnodes];
 unsigned long long node_Result[maxnodes];
+unsigned long long results_sum;
 unsigned char wordcount;
 int c, c2, s, i, running=1, filesize, fileoffset, bytecount, args, broadcastflag, tint, tint2;
 int nodes=0, nodeid, nodevar;
@@ -281,6 +282,7 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
+				memset(&parameters, 0, 100);
 				printf("Data: ");
 				fgets(userinput, 100, stdin);	// Get up to 100 chars from the keyboard
 				// remove extra spaces from userinput
@@ -485,18 +487,21 @@ int main(int argc, char *argv[])
 // RESULTS
 		else if (strcasecmp(s_results, command) == 0)
 		{
+			results_sum = 0;
 			args = sscanf(userinput, "%*s %s", command);	// grab the second word in the string
 			if (args < 1)
 			{
 				if (nodes == 0)
-					printf("No nodes. Run discover first.");
+					printf("No nodes. Run discover first.\n");
 				else
 				{
 					printf("Current results:\n");
 					for (c=0; c<nodes; c++)
 					{
-						printf("ID %02d - Decimal:%lld\n", c+1, node_Result[c]);
+						printf("ID %02d - Decimal: %lld\n", c+1, node_Result[c]);
+						results_sum += node_Result[c];
 					}
+					printf("Sum: %lld\n", results_sum);
 				}
 			}
 			else

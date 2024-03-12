@@ -26,8 +26,9 @@ unsigned int istrlen (const char *str);
 void output(const char *str);
 char *reverse(char *str);
 void itoa(int n, char s[]);
+int atoi(char s[]);
 
-unsigned long maxn=100000, primes=1, local=0, lock=0, process_stage=0, processes=0, args=0, start=3, incby=0;
+unsigned long maxn=100000, primes=0, local=0, lock=0, process_stage=0, processes=0, args=0, start=3, incby=0;
 unsigned char tstring[25];
 
 unsigned char eth_dst[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
@@ -37,19 +38,24 @@ unsigned char eth_data[10] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x
 
 int main()
 {
-	unsigned long time_start, time_finish, k, p = 1, q, localcore;
-	primes = 1;
+	unsigned long k, p = 1, q, localcore;
 	
-	// Set default values
-	processes = 1;
-	start = 3;			// starting offset
-	incby = 2;			// Total number of nodes working on the problem
+	// Get parameter values
+	// Default would be 1, 3, 2
+	char * params = (void *)0x800E;
+	processes = atoi(params);
+	params += 2;
+	start = atoi(params);
+	params += 2;
+	incby = atoi(params);
+
+	if (processes == 0 || start == 0 || incby == 0)
+	{
+		output ("Invalid parameters.\n");
+		return 0;
+	}
 
 	output("\nBareMetal Node PrimeSMP v0.1");
-//	processes = b_string_to_int(b_get_argv(1));
-//	start = b_string_to_int(b_get_argv(2));		// starting offset
-//	incby = b_string_to_int(b_get_argv(3));		// Total number of nodes working on the problem
-
 	output("\nUsing ");
 	itoa(processes, tstring);
 	output(tstring);
@@ -62,7 +68,6 @@ int main()
 	
 	process_stage = processes;
 	localcore = b_config(SMP_GET_ID, 0);
-	time_start = b_config(TIMECOUNTER, 0);		// Grab the starting time
 
 	// Start the other CPU cores
 	for (k=0; k<processes; k++)
@@ -86,15 +91,10 @@ int main()
 //	b_smp_wait();				// Wait for all CPU cores to finish
 
 	// Output the results
-	time_finish = b_config(TIMECOUNTER, 0);
 	output("\nFound ");
 	itoa(primes, tstring);
 	output(tstring);
-	output(" primes in ");
-	time_finish = (time_finish - time_start) / 8;
-	itoa(time_finish, tstring);
-	output(tstring);
-	output(" seconds\n");
+	output(" primes\n");
 
 	// Send the result
 	imemcpy(&eth_data, &primes, 8);
@@ -210,6 +210,48 @@ void itoa(int n, char s[])
 	reverse(s);
 	s[i] = '\0';
 	return;
+}
+
+int atoi(char s[])
+{
+	register int result = 0;
+	register unsigned int digit;
+	int sign;
+
+	/*
+	* Skip any leading blanks.
+	*/
+
+	while (*s == ' ') {
+		s += 1;
+	}
+
+	/*
+	* Check for a sign.
+	*/
+
+	if (*s == '-') {
+		sign = 1;
+		s += 1;
+	} else {
+		sign = 0;
+		if (*s == '+') {
+		s += 1;
+		}
+	}
+
+	for ( ; ; s += 1) {
+		digit = *s - '0';
+		if (digit > 9) {
+			break;
+		}
+		result = (10*result) + digit;
+	}
+
+	if (sign) {
+		return -result;
+	}
+	return result;
 }
 
 // EOF

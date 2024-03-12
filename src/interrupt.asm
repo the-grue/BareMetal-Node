@@ -320,6 +320,7 @@ mcp_callback:
 	cmp al, 0x02			; 0x02 - Dispatch
 	je mcp_load
 	cmp al, 0x03			; 0x03 - Parameters
+	je mcp_parameters
 	cmp al, 0x04			; 0x04 - Execute
 	je mcp_start
 	cmp al, 0x06			; 0x06 - Stop
@@ -361,6 +362,13 @@ mcp_load:
 	mov rsi, os_PacketBuffers+18
 	lodsq				; Load the memory address
 	mov rdi, rax
+	mov rcx, 1024 / 8		; We copy 8 bytes at a time
+	rep movsq
+	jmp mcp_callback_end
+
+mcp_parameters:
+	mov rsi, os_PacketBuffers+18	; packet size + header
+	mov rdi, 0x8000			; TODO Set a proper location
 	mov rcx, 1024 / 8		; We copy 8 bytes at a time
 	rep movsq
 	jmp mcp_callback_end
