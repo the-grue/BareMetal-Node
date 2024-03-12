@@ -8,6 +8,8 @@ function baremetal_clean {
 	rm -rf src/Pure64
 	rm -rf src/BareMetal-kernel
 	rm -rf src/libBareMetal.*
+	rm -rf src/*.o
+	rm -rf src/*.app
 	rm -rf bin
 	rm -f mcp
 }
