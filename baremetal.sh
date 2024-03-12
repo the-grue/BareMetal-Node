@@ -54,6 +54,7 @@ function baremetal_build {
 		objcopy --remove-section .eh_frame --remove-section .rel.eh_frame --remove-section .rela.eh_frame primesmp.o
 		objcopy --remove-section .eh_frame --remove-section .rel.eh_frame --remove-section .rela.eh_frame libBareMetal.o
 		ld -T c.ld -o primesmp.app primesmp.o libBareMetal.o
+		chmod -x primesmp.app
 		mv primesmp.app ../bin/
 	fi
 	cd ..
