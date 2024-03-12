@@ -33,12 +33,11 @@
 #include "libBareMetal.h"
 
 void prime_process();
-void * imemcpy (void *dest, const void *src, int len);
-unsigned int istrlen (const char *str);
+void * i_memcpy (void *dest, const void *src, int len);
+unsigned int i_strlen (const char *str);
 void output(const char *str);
-char *reverse(char *str);
-void itoa(int n, char s[]);
-int atoi(char s[]);
+int i_atoi(const char *str);
+void i_itoa(int value, char *str);
 
 unsigned long maxn=0, primes=0, local=0, lock=0, process_stage=0, processes=0, args=0, start=0, incby=0;
 unsigned char tstring[25];
@@ -75,13 +74,13 @@ int main()
 	// Get parameter values
 	// Default would be 1, 3, 2, 100000
 	char * params = (void *)0x800E;
-	processes = atoi(params);
+	processes = i_atoi(params);
 	params += 2;
-	start = atoi(params);
+	start = i_atoi(params);
 	params += 2;
-	incby = atoi(params);
+	incby = i_atoi(params);
 	params += 2;
-	maxn = atoi(params);
+	maxn = i_atoi(params);
 
 	output("\nBareMetal Node PrimeSMP v0.1\n");
 	if (processes == 0 || start == 0 || incby == 0 || maxn == 0)
@@ -91,16 +90,16 @@ int main()
 	}
 
 	output("Using ");
-	itoa(processes, tstring);
+	i_itoa(processes, tstring);
 	output(tstring);
 	output(" CPU core(s), starting at ");
-	itoa(start, tstring);
+	i_itoa(start, tstring);
 	output(tstring);
 	output(", incrementing by ");
-	itoa(incby, tstring);
+	i_itoa(incby, tstring);
 	output(tstring);
 	output(", going up to ");
-	itoa(maxn, tstring);
+	i_itoa(maxn, tstring);
 	output(tstring);
 	
 	process_stage = processes;
@@ -121,17 +120,18 @@ int main()
 	// Wait for all other CPU cores to be finished
 	do {
 		b_system(SMP_BUSY, (void *)&p, (void *)&q);
+		output(".");
 	} while (p == 1);
 
 	// Output the results to console
 	output("\nDone!\n");
 //	output("\nFound ");
-//	itoa(primes, tstring);
+//	i_itoa(primes, tstring);
 //	output(tstring);
 //	output(" primes\n");
 
 	// Send the result
-	imemcpy(&packet.eth_data, &primes, 8);
+	i_memcpy(&packet.eth_data, &primes, 8);
 	b_net_tx((void *)&packet, 64, 0);
 
 	return 0;
@@ -155,7 +155,7 @@ void prime_process()
 	process_stage--;
 //	output("\nRunning on core ");
 //	core = b_config(SMP_GET_ID, 0);
-//	itoa(core, tstring);
+//	i_itoa(core, tstring);
 //	output(tstring);
 	b_system(SMP_UNLOCK, (void *)lock, 0);
 	i = start + (process_stage * incby);
@@ -180,111 +180,109 @@ void prime_process()
 	b_system(SMP_UNLOCK, (void *)lock, 0);
 }
 
-void * imemcpy (void *dest, const void *src, int len)
+void * i_memcpy (void *dest, const void *src, int len)
 {
 	char *d = dest;
 	const char *s = src;
 	while (len--)
+	{
 		*d++ = *s++;
+	}
 	return dest;
 }
 
-unsigned int istrlen (const char *str)
+unsigned int i_strlen (const char *str)
 {
 	const char *char_ptr;
 	for (char_ptr = str; (unsigned long int) char_ptr != 0; ++char_ptr)
 	if (*char_ptr == '\0')
+	{
 		return char_ptr - str;
+	}
 }
 
 void output(const char *str)
 {
-	int val = istrlen(str);
+	int val = i_strlen(str);
 	b_output(str, val);
 }
 
-char *reverse(char *str)
-{
-	char tmp, *src, *dst;
-	int len;
-	if (str != 0)
+int i_atoi(const char *str) {
+	int result = 0; // Initialize result
+	int sign = 1;  // Initialize sign as positive
+	int i = 0; // Initialize index of first digit
+
+	// If number is negative, then update sign
+	if (str[0] == '-')
 	{
-		len = istrlen (str);
-		if (len > 1)
+		sign = -1;
+		i++; // Also update index of first digit
+	}
+
+	// Iterate through all digits of input string and update result
+	for (; str[i] != '\0'; ++i)
+	{
+		// Check for non-numeric char. Assuming ASCII, numeric chars are from '0'(48) to '9'(57).
+		if (str[i] < '0' || str[i] > '9')
 		{
-			src = str;
-			dst = src + len - 1;
-			while (src < dst)
-			{
-				tmp = *src;
-				*src++ = *dst;
-				*dst-- = tmp;
-			}
+			break; // If non-numeric char is found, break the loop.
 		}
+
+		// Shift result 10 times to left and add current digit.
+		// '0' is subtracted to convert char to int.
+		result = result * 10 + str[i] - '0';
 	}
-	return str;
+  
+	// Return result with sign
+	return result * sign;
 }
 
-void itoa(int n, char s[])
-{
-	int i, sign;
+void i_itoa(int value, char *str) {
+	char temp[12]; // Temporary array to hold characters. 11 chars for INT_MIN, 1 for '\0'
+	int i = 0;
+	int isNegative = 0;
 
-	if ((sign = n) < 0)		/* record sign */
-		n = -n;			/* make n positive */
-	i = 0;
-
-	do {				/* generate digits in reverse order */
-		s[i++] = n % 10 + '0';	/* get next digit */
-	} while ((n /= 10) > 0);	/* delete it */
-
-	if (sign < 0)
-		s[i++] = '-';
-
-	reverse(s);
-	s[i] = '\0';
-	return;
-}
-
-int atoi(char s[])
-{
-	register int result = 0;
-	register unsigned int digit;
-	int sign;
-
-	/*
-	* Skip any leading blanks.
-	*/
-
-	while (*s == ' ') {
-		s += 1;
+	// Check if number is negative
+	if (value < 0)
+	{
+		isNegative = 1;
+		value = -value; // Make the number positive for processing
 	}
 
-	/*
-	* Check for a sign.
-	*/
+	// Process individual digits
+	do {
+		temp[i++] = (value % 10) + '0'; // Convert int digit to char
+		value /= 10;
+	} while (value);
 
-	if (*s == '-') {
-		sign = 1;
-		s += 1;
-	} else {
-		sign = 0;
-		if (*s == '+') {
-		s += 1;
-		}
+	// If the number was negative, add '-'
+	if (isNegative)
+	{
+		temp[i++] = '-';
 	}
 
-	for ( ; ; s += 1) {
-		digit = *s - '0';
-		if (digit > 9) {
-			break;
-		}
-		result = (10*result) + digit;
+	temp[i] = '\0'; // Null-terminate the temporary string
+
+	// Reverse the temporary string into the output string
+	int start = 0;
+	int end = i - 1; // Exclude the null terminator for reversing
+	while (start < end)
+	{
+		// Swap characters
+		char t = temp[start];
+		temp[start] = temp[end];
+		temp[end] = t;
+		start++;
+		end--;
 	}
 
-	if (sign) {
-		return -result;
+	// Copy the reversed string into the output buffer
+	for (int j = 0; temp[j] != '\0'; ++j)
+	{
+		str[j] = temp[j];
 	}
-	return result;
+
+	str[i] = '\0'; // Ensure the output string is null-terminated
 }
 
 // EOF
