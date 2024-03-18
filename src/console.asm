@@ -86,9 +86,9 @@ adjustnext:
 	rep stosq
 
 	; Set foreground/background color
-	mov eax, 0x00FFFFFF
+	mov eax, 0x00FFFFFF		; 0x00BBGGRR
 	mov [FG_Color], eax
-	mov eax, 0x00404040
+	mov eax, 0x00000000
 	mov [BG_Color], eax
 
 	call screen_clear
@@ -741,8 +741,6 @@ dump_al:
 
 hextable: db '0123456789ABCDEF'
 tchar: db 0, 0, 0
-;temp_string1: times 50 db 0
-;temp_string2: times 50 db 0
 temp_string: db 0
 
 times CONSOLESIZE-($-$$) db 0x90		; Set the compiled kernel binary to at least this size in bytes
