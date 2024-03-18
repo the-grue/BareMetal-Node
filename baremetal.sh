@@ -23,6 +23,7 @@ function baremetal_setup {
 	git clone https://github.com/ReturnInfinity/Pure64.git -q
 	git clone https://github.com/ReturnInfinity/BareMetal-kernel.git -q
 	cd ..
+	sed -i '' 's/KERNELSIZE equ 8192/KERNELSIZE equ 16384/g' src/BareMetal-kernel/src/kernel.asm
 	baremetal_build
 	echo "Done!"
 }
